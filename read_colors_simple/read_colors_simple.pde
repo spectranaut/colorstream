@@ -15,47 +15,44 @@ Eventually:
 
 import java.util.*;
 
-float dropwidth = 1;
-int droplength;
-int speed = 2;
-ArrayList<Drop> dlist = new ArrayList<Drop>();
-int[] COLORARR = {0, 40, 60, 120, 240, 280};
-int NUMCOLORS = 6;
+float dropwidth = 1;                            // width of drops
+int droplength;                                 // length of drops
+int speed = 2;                                  // pixels per frame, speed of drops
+ArrayList<Drop> droplist = new ArrayList<Drop>();  // array of all drops on screen
+int[] COLORARR = {0, 40, 60, 120, 240, 280};    // "rainbow" in HSB hue values
+int NUMCOLORS = 6;                              // COLORARR.length() - 1
+int SCREENWIDTH = 500;
+int SCREENHEIGHT = 200;
 
 void setup() {
-  size(500,200);
+  size(SCREENWIDTH,SCREENHEIGHT);
   smooth();
   colorMode(HSB, 360, 100, 100);
-  
   droplength = 3*height;
 }
-
-
 
 void draw() {
   background(0,0,0);
   
-  // need to calculate colorcode, x location
-  // can get x from colorcode
-  int cc;
+  // Check if new drop should be added to droplist
   if (keyPressed) {
-    cc = getColorCode(key);
+    int cc = getColorCode(key);
     if (cc != -1) {
       int x = getXLocation(cc);
-      dlist.add(new Drop(COLORARR[cc], x, 0));
+      droplist.add(new Drop(COLORARR[cc], x, 0));
     }
   }
   
-
-  Iterator<Drop> itr = dlist.iterator();  
+  // draw all drops on screen
+  Iterator<Drop> itr = droplist.iterator();  
   while(itr.hasNext()) {
     Drop d = itr.next();
     d.display();
+    // remove drops that have left screen
     if (d.removeme) {
       itr.remove();
     }
   }
-  println(dlist.size());
 }
 
 class Drop {
@@ -102,9 +99,14 @@ int getColorCode(char k) {
   return -1;
 }
 
+/*
+ * Return an x location for a drop:
+ * x location decided by a gaussian, centered in the middle
+ * of the each colors rainbow ordered location.
+ */
 int getXLocation(int cc) {
-  return (int) ( width/(2.0*NUMCOLORS) 
+  return (int) (width/(2.0*NUMCOLORS) 
     + (cc*width)/NUMCOLORS 
-    + (width/(3.0*NUMCOLORS))*randomGaussian() );
+    + (width/(3.0*NUMCOLORS))*randomGaussian());
 }
 
